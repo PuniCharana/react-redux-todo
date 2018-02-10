@@ -1,6 +1,28 @@
 ## React Redux Todo (Method-1)
+___
+
+## Introduction
+A simple todo app build using [React](https://reactjs.org/). This project is build to demonstrate different ways to use redux in react app.
+
+
+* The [master](https://github.com/PuniCharana/react-redux-todo/tree/master) branch contains (Method-1) one way of implementing redux to react app.
+
+* The [method-2](https://github.com/PuniCharana/react-redux-todo/tree/method-2) branch contains (Method-2) one way of implementing redux to react app.
+
+**Note**: Both **master** (Method-1) and **method-2** (Method-2) branch do the exact same thing. The only difference is how redux is implemented.
+
 
 <img src="https://raw.githubusercontent.com/PuniCharana/react-redux-todo/master/public/assets/react-redux-todo.PNG" alt="alt text" width="300px">
+
+## Features
+
+* Add New Todo
+* Delete Todo
+
+
+## Contribution
+
+Please feel free to add new methods/ways of redux implementation. You can also add/sgare your way of implementing redux to your app. Any correction is very much appreciated.
 
 ___
 index.css
@@ -55,11 +77,12 @@ index.js
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-
-import Todos from './components/Todos'
-
+import Todos from './components/Todos';
+import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(<Todos/>, document.getElementById('root'));
+registerServiceWorker();
+
 ```
 
 ___
@@ -203,7 +226,7 @@ export default Todo;
 ```
 
 ___
-components/Todo.js
+components/Todos.js
 ```js
 import React, { Component } from 'react';
 import Todo from './Todo'
