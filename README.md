@@ -1,15 +1,8 @@
-## React Redux Todo (Method-1)
+## React Flux Todo (Flux)
 ___
 
 ## Introduction
-A simple todo app build using [React](https://reactjs.org/). This project is build to demonstrate different ways to implement redux in react app.
-
-
-* The [master](https://github.com/PuniCharana/react-redux-todo/tree/master) branch contains (Method-1) one way of implementing redux to react app.
-
-* The [method-2](https://github.com/PuniCharana/react-redux-todo/tree/method-2) branch contains (Method-2) one way of implementing redux to react app.
-
-**Note**: Both **master** (Method-1) and **method-2** (Method-2) branch do the exact same thing. The only difference is how redux is implemented.
+A simple todo app build using [React](https://reactjs.org/).
 
 
 <img src="https://raw.githubusercontent.com/PuniCharana/react-redux-todo/master/public/assets/react-redux-todo.PNG" alt="alt text" width="300px">
@@ -19,10 +12,27 @@ A simple todo app build using [React](https://reactjs.org/). This project is bui
 * Add New Todo
 * Delete Todo
 
+___
+```json
+{
+  "name": "react-redux-todo",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "flux": "^3.1.3",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-scripts": "1.1.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
 
-## Contribution
-
-Feel free to share/add new ways to implement redux to react app. And Please do correct me if i'm doing smething wrong.
+```
 
 ___
 index.css
