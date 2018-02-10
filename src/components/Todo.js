@@ -1,10 +1,16 @@
 import React from 'react';
-import * as TodosAction from '../actions/TodoActions'
+import { connect } from 'react-redux';
+import C from '../constants'
 
 const Todo = (props) => {
     
     function deleteTodo () {
-        TodosAction.deleteTodo(props.id)
+        props.dispatch({
+            type: C.DELETE_TODO,
+            payload: {
+                id: props.id
+            }
+        })
     }
     
     return(
@@ -15,4 +21,8 @@ const Todo = (props) => {
     )
 }
 
-export default Todo;
+const mapStateToProps =(state)=> ({
+    todos: state.todos
+})
+
+export default connect(mapStateToProps)(Todo);
