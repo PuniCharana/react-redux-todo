@@ -93,19 +93,20 @@ import './index.css';
 import Todos from './components/Todos';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<Todos/>, document.getElementById('root'));
+import { createStore } from 'redux'; 
+import allReducer from './reducers/';
+import { Provider } from 'react-redux'
+
+const store = createStore(allReducer);
+
+ReactDOM.render(
+    <Provider store={store}>
+        <Todos/>
+    </Provider>,
+document.getElementById('root'));
 registerServiceWorker();
 
 ```
-
-___
-dispatcher.js
-```js
-import { Dispatcher } from 'flux';
-const dispatcher = new Dispatcher();
-export default dispatcher;
-```
-
 ___
 constants.js
 ```js
@@ -118,113 +119,77 @@ export default constants
 ```
 
 ___
-stores/TodoStore.js
+reducers/index.js
 ```js
-import { EventEmitter } from 'events';
-import dispatcher from '../dispatcher'
-import C from '../constants'
+import { combineReducers } from 'redux'
+import TodoReducer from './todo-reducer'
 
-class TodoStore extends EventEmitter {
-    constructor() {
-        super();
+const allReducer = combineReducers({
+    todos: TodoReducer
+});
 
-        this.todos = [
-            {
-                  id: Date.now(),
-                  task: "Wake up",
-                  completed: false
-            },
-            {
-                  id: Date.now()+1,
-                  task: "Browse Reddit",
-                  completed: false
-            },
-            {
-                  id: Date.now()+2,
-                  task: "Eat Lunch",
-                  completed: false
-            },
-            {
-                  id: Date.now()+3,
-                  task: "Browse Reddit Again",
-                  completed: false
-            }
-        ];
-    }
-
-    addTodo(text) {
-        this.todos.push({
-            id: Date.now(),
-            task: text,
-            completed: false
-        });
-        
-        this.emit("change")
-    }
-
-    deleteTodo(id) {
-        var removeIndex = this.todos.map(function(item) { return item.id; }).indexOf(id);
-        this.todos.splice(removeIndex, 1);
-
-        this.emit("change")
-    }
-
-    getAllTodos() {
-        return this.todos;
-    }
-
-    handleActions(action) {
-        console.log("TodoStore receive an action: ", action);
-
-        switch (action.type) {
-            case C.ADD_TODO: {
-                this.addTodo(action.task)
-                break;
-            }
-            case C.DELETE_TODO: {
-                this.deleteTodo(action.id)
-                break;
-            }
-        }
-    }
-}
-
-const todoStore = new TodoStore();
-dispatcher.register(todoStore.handleActions.bind(todoStore));
-export default todoStore;
+export default allReducer;
 ```
 
 ___
-actions/TodoActions.js
+reducers/todo-reducer.js
 ```js
-import dispatcher from '../dispatcher'
 import C from '../constants'
 
-export function createTodo(text) {
-    dispatcher.dispatch({
-        type: C.ADD_TODO,
-        task: text
-    })
-}
+const initialState = [
+    {
+        id: Date.now(),
+        task: "Wake up",
+        completed: false
+    },
+    {
+        id: Date.now()+1,
+        task: "Browse Reddit",
+        completed: false
+    },
+    {
+        id: Date.now()+2,
+        task: "Eat Lunch",
+        completed: false
+    },
+    {
+        id: Date.now()+3,
+        task: "Browse Reddit Again",
+        completed: false
+    }
+];
 
-export function deleteTodo(id) {
-    dispatcher.dispatch({
-        type: C.DELETE_TODO,
-        id
-    })
+export default function (previousState=initialState, action) {
+    switch (action.type) {
+        case C.ADD_TODO:
+            return previousState.concat({
+                id: Date.now(),
+                task: action.payload.text,
+                completed: false
+            })
+        case C.DELETE_TODO:
+            return previousState.filter((item)=>{ return item.id !== action.payload.id });
+        default:
+            return previousState;
+    }
 }
 ```
-
 ___
 components/Todo.js
 ```js
 import React from 'react';
-import * as TodosAction from '../actions/TodoActions'
+import { connect } from 'react-redux';
+import C from '../constants'
 
 const Todo = (props) => {
     
     function deleteTodo () {
-        TodosAction.deleteTodo(props.id)
+        props.dispatch({
+            type: C.DELETE_TODO,
+            payload: {
+                id: props.id
+            }
+        })
     }
     
     return(
@@ -235,7 +200,11 @@ const Todo = (props) => {
     )
 }
 
-export default Todo;
+const mapStateToProps =(state)=> ({
+    todos: state.todos
+})
+
+export default connect(mapStateToProps)(Todo);
 ```
 
 ___
@@ -243,32 +212,16 @@ components/Todos.js
 ```js
 import React, { Component } from 'react';
 import Todo from './Todo'
-import TodoStore from '../stores/TodoStore';
-import * as TodosAction from '../actions/TodoActions'
+import { connect } from 'react-redux';
+import C from '../constants'
 
 class Todos extends Component {
     constructor() {
         super();
 
-        this.getTodos = this.getTodos.bind(this)
         this.state = {
-              todos: TodoStore.getAllTodos(),
-              todoInput: ""
+            todoInput: ""
         }
-    }
-
-    componentWillMount() {
-        TodoStore.on('change', this.getTodos)
-    }
-
-    getTodos() {
-        this.setState({
-            todos: TodoStore.getAllTodos()
-        });
-    }
-
-    componentWillUnmount() {
-        TodoStore.removeListener('change', this.getTodos)
     }
 
     handleChange = (e) => {
@@ -278,14 +231,19 @@ class Todos extends Component {
     addTodo = () => {
 
         if (!this.state.todoInput) return alert("Todo cannot be empty");
-        TodosAction.createTodo(this.state.todoInput)
+        
+        this.props.dispatch({
+            type: C.ADD_TODO,
+            payload: {
+                text: this.state.todoInput
+            }
+        })
 
         this.setState({todoInput: ""});
     }
 
     render() {
-        const { todos } = this.state
-        const TodosComponents = todos.map((todo, index) => <Todo key={index} {...todo}/>);
+        const todoLists = this.props.todos.map((todo)=><Todo key={todo.id} {...todo}/>)
         return (
             <div className="Todos">
                 <div className="input-container">
@@ -294,11 +252,15 @@ class Todos extends Component {
                 </div>
                 <br/>
                 <br/>
-                {TodosComponents}
+                {todoLists}
             </div>
         );
     }
 }
 
-export default Todos;
+const mapStateToProps =(state)=> ({
+    todos: state.todos
+})
+
+export default connect(mapStateToProps)(Todos);
 ```
