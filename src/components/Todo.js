@@ -1,10 +1,9 @@
 import React from 'react';
-import * as TodosAction from '../actions/TodoActions'
 
 const Todo = (props) => {
     
     function deleteTodo () {
-        TodosAction.deleteTodo(props.id)
+        props.onClick(props.id)
     }
     
     return(

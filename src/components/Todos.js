@@ -1,57 +1,69 @@
 import React, { Component } from 'react';
 import Todo from './Todo'
-import TodoStore from '../stores/TodoStore';
-import * as TodosAction from '../actions/TodoActions'
 
 class Todos extends Component {
     constructor() {
         super();
 
-        this.getTodos = this.getTodos.bind(this)
         this.state = {
-              todos: TodoStore.getAllTodos(),
-              todoInput: ""
+              todos: [
+                {
+                      id: Date.now(),
+                      task: "Wake up",
+                      completed: false
+                },
+                {
+                      id: Date.now()+1,
+                      task: "Browse Reddit",
+                      completed: false
+                },
+                {
+                      id: Date.now()+2,
+                      task: "Eat Lunch",
+                      completed: false
+                },
+                {
+                      id: Date.now()+3,
+                      task: "Browse Reddit Again",
+                      completed: false
+                }
+              ]
         }
-    }
-
-    componentWillMount() {
-        TodoStore.on('change', this.getTodos)
-    }
-
-    getTodos() {
-        this.setState({
-            todos: TodoStore.getAllTodos()
-        });
-    }
-
-    componentWillUnmount() {
-        TodoStore.removeListener('change', this.getTodos)
-    }
-
-    handleChange = (e) => {
-        this.setState({todoInput: e.target.value});
     }
 
     addTodo = () => {
 
-        if (!this.state.todoInput) return alert("Todo cannot be empty");
-        TodosAction.createTodo(this.state.todoInput)
+        if (!this.refs.todoInputVal.value) return alert("Todo cannot be empty");
+        var todos = this.state.todos;
+        todos.push({
+                    id: Date.now(),
+                    task: this.refs.todoInputVal.value,
+                    completed: false
+                })
 
-        this.setState({todoInput: ""});
+        this.setState(todos);
+        this.refs.todoInputVal.value = ""
+    }
+
+    deleteTodo =(id)=> {
+        var todos = this.state.todos;
+        var removeIndex = todos.map(function(item) { return item.id; }).indexOf(id);
+        todos.splice(removeIndex, 1);
+        this.setState(todos);
     }
 
     render() {
         const { todos } = this.state
-        const TodosComponents = todos.map((todo, index) => <Todo key={index} {...todo}/>);
+        const todoLists = todos.map((todo, index) => <Todo onClick={this.deleteTodo} key={index} {...todo}/>);
         return (
             <div className="Todos">
                 <div className="input-container">
-                    <input value={this.state.todoInput} type="text" onChange={this.handleChange} placeholder="Add new todo"/>
+                    <input type="text" ref="todoInputVal" placeholder="Add new todo"/>
                     <button onClick={this.addTodo}>ADD</button>
                 </div>
                 <br/>
                 <br/>
-                {TodosComponents}
+                {todoLists}
             </div>
         );
     }

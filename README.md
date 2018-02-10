@@ -1,4 +1,4 @@
-## React Flux Todo (Flux)
+## React Todo
 ___
 
 ## Introduction
@@ -19,7 +19,6 @@ ___
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "flux": "^3.1.3",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.1"
@@ -96,132 +95,14 @@ registerServiceWorker();
 ```
 
 ___
-dispatcher.js
-```js
-import { Dispatcher } from 'flux';
-const dispatcher = new Dispatcher();
-export default dispatcher;
-```
-
-___
-constants.js
-```js
-const constants = {
-  ADD_TODO: "ADD_TODO",
-  DELETE_TODO: "DELETE_TODO"
-}
-
-export default constants
-```
-
-___
-stores/TodoStore.js
-```js
-import { EventEmitter } from 'events';
-import dispatcher from '../dispatcher'
-import C from '../constants'
-
-class TodoStore extends EventEmitter {
-    constructor() {
-        super();
-
-        this.todos = [
-            {
-                  id: Date.now(),
-                  task: "Wake up",
-                  completed: false
-            },
-            {
-                  id: Date.now()+1,
-                  task: "Browse Reddit",
-                  completed: false
-            },
-            {
-                  id: Date.now()+2,
-                  task: "Eat Lunch",
-                  completed: false
-            },
-            {
-                  id: Date.now()+3,
-                  task: "Browse Reddit Again",
-                  completed: false
-            }
-        ];
-    }
-
-    addTodo(text) {
-        this.todos.push({
-            id: Date.now(),
-            task: text,
-            completed: false
-        });
-        
-        this.emit("change")
-    }
-
-    deleteTodo(id) {
-        var removeIndex = this.todos.map(function(item) { return item.id; }).indexOf(id);
-        this.todos.splice(removeIndex, 1);
-
-        this.emit("change")
-    }
-
-    getAllTodos() {
-        return this.todos;
-    }
-
-    handleActions(action) {
-        console.log("TodoStore receive an action: ", action);
-
-        switch (action.type) {
-            case C.ADD_TODO: {
-                this.addTodo(action.task)
-                break;
-            }
-            case C.DELETE_TODO: {
-                this.deleteTodo(action.id)
-                break;
-            }
-        }
-    }
-}
-
-const todoStore = new TodoStore();
-dispatcher.register(todoStore.handleActions.bind(todoStore));
-export default todoStore;
-```
-
-___
-actions/TodoActions.js
-```js
-import dispatcher from '../dispatcher'
-import C from '../constants'
-
-export function createTodo(text) {
-    dispatcher.dispatch({
-        type: C.ADD_TODO,
-        task: text
-    })
-}
-
-export function deleteTodo(id) {
-    dispatcher.dispatch({
-        type: C.DELETE_TODO,
-        id
-    })
-}
-```
-
-___
 components/Todo.js
 ```js
 import React from 'react';
-import * as TodosAction from '../actions/TodoActions'
 
 const Todo = (props) => {
     
     function deleteTodo () {
-        TodosAction.deleteTodo(props.id)
+        props.onClick(props.id)
     }
     
     return(
@@ -240,53 +121,65 @@ components/Todos.js
 ```js
 import React, { Component } from 'react';
 import Todo from './Todo'
-import TodoStore from '../stores/TodoStore';
-import * as TodosAction from '../actions/TodoActions'
 
 class Todos extends Component {
     constructor() {
         super();
 
-        this.getTodos = this.getTodos.bind(this)
         this.state = {
-              todos: TodoStore.getAllTodos(),
-              todoInput: ""
+              todos: [
+                {
+                      id: Date.now(),
+                      task: "Wake up",
+                      completed: false
+                },
+                {
+                      id: Date.now()+1,
+                      task: "Browse Reddit",
+                      completed: false
+                },
+                {
+                      id: Date.now()+2,
+                      task: "Eat Lunch",
+                      completed: false
+                },
+                {
+                      id: Date.now()+3,
+                      task: "Browse Reddit Again",
+                      completed: false
+                }
+              ]
         }
-    }
-
-    componentWillMount() {
-        TodoStore.on('change', this.getTodos)
-    }
-
-    getTodos() {
-        this.setState({
-            todos: TodoStore.getAllTodos()
-        });
-    }
-
-    componentWillUnmount() {
-        TodoStore.removeListener('change', this.getTodos)
-    }
-
-    handleChange = (e) => {
-        this.setState({todoInput: e.target.value});
     }
 
     addTodo = () => {
 
-        if (!this.state.todoInput) return alert("Todo cannot be empty");
-        TodosAction.createTodo(this.state.todoInput)
+        if (!this.refs.todoInputVal.value) return alert("Todo cannot be empty");
+        var todos = this.state.todos;
+        todos.push({
+                    id: Date.now(),
+                    task: this.refs.todoInputVal.value,
+                    completed: false
+                })
 
-        this.setState({todoInput: ""});
+        this.setState(todos);
+        this.refs.todoInputVal.value = ""
+    }
+
+    deleteTodo =(id)=> {
+        var todos = this.state.todos;
+        var removeIndex = todos.map(function(item) { return item.id; }).indexOf(id);
+        todos.splice(removeIndex, 1);
+        this.setState(todos);
     }
 
     render() {
         const { todos } = this.state
-        const TodosComponents = todos.map((todo, index) => <Todo key={index} {...todo}/>);
+        const TodosComponents = todos.map((todo, index) => <Todo onClick={this.deleteTodo} key={index} {...todo}/>);
         return (
             <div className="Todos">
                 <div className="input-container">
-                    <input value={this.state.todoInput} type="text" onChange={this.handleChange} placeholder="Add new todo"/>
+                    <input type="text" ref="todoInputVal" placeholder="Add new todo"/>
                     <button onClick={this.addTodo}>ADD</button>
                 </div>
                 <br/>
