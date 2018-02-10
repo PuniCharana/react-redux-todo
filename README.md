@@ -2,7 +2,7 @@
 ___
 
 ## Introduction
-A simple todo app build using [React](https://reactjs.org/). This project is build to demonstrate different ways to use redux in react app.
+A simple todo app build using [React](https://reactjs.org/). This project is build to demonstrate different ways to implement redux in react app.
 
 
 * The [master](https://github.com/PuniCharana/react-redux-todo/tree/master) branch contains (Method-1) one way of implementing redux to react app.
@@ -22,7 +22,7 @@ A simple todo app build using [React](https://reactjs.org/). This project is bui
 
 ## Contribution
 
-Please feel free to add new methods/ways of redux implementation. You can also add/sgare your way of implementing redux to your app. Any correction is very much appreciated.
+Feel free to share/add new ways to implement redux to react app. And Please do correct me if i'm doing smething wrong.
 
 ___
 index.css
